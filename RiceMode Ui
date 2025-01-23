@@ -1,0 +1,197 @@
+local UILib = {}
+
+function UILib:CreateUI(title)
+    -- Main UI frame
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Name = "CustomUI"
+    
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 400, 0, 500)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    
+    -- Title
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    TitleLabel.Text = title or "UI Library"
+    TitleLabel.TextColor3 = Color3.new(1, 1, 1)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.TextSize = 20
+    TitleLabel.Parent = MainFrame
+    
+    -- Tabs
+    local TabContainer = Instance.new("Frame")
+    TabContainer.Size = UDim2.new(1, 0, 0, 40)
+    TabContainer.Position = UDim2.new(0, 0, 0, 50)
+    TabContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    TabContainer.BorderSizePixel = 0
+    TabContainer.Parent = MainFrame
+    
+    local TabHolder = {}
+    local ContentFrames = {}
+    local ActiveTab = nil
+
+    local function ShowTab(tabName)
+        for name, frame in pairs(ContentFrames) do
+            frame.Visible = (name == tabName)
+        end
+        ActiveTab = tabName
+    end
+
+    local function CreateTabButton(tabName)
+        local TabButton = Instance.new("TextButton")
+        TabButton.Size = UDim2.new(0, 100, 1, 0)
+        TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        TabButton.Text = tabName
+        TabButton.TextColor3 = Color3.new(1, 1, 1)
+        TabButton.Font = Enum.Font.SourceSans
+        TabButton.TextSize = 18
+        TabButton.Parent = TabContainer
+
+        TabButton.MouseButton1Click:Connect(function()
+            ShowTab(tabName)
+        end)
+
+        return TabButton
+    end
+
+    local function AddTab(tabName)
+        if TabHolder[tabName] then return end
+
+        local ContentFrame = Instance.new("Frame")
+        ContentFrame.Size = UDim2.new(1, 0, 1, -90)
+        ContentFrame.Position = UDim2.new(0, 0, 0, 90)
+        ContentFrame.BackgroundTransparency = 1
+        ContentFrame.Visible = false
+        ContentFrame.Parent = MainFrame
+
+        local UIListLayout = Instance.new("UIListLayout")
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout.Padding = UDim.new(0, 5)
+        UIListLayout.Parent = ContentFrame
+
+        TabHolder[tabName] = CreateTabButton(tabName)
+        ContentFrames[tabName] = ContentFrame
+
+        -- Mặc định hiển thị tab đầu tiên
+        if not ActiveTab then
+            ShowTab(tabName)
+        end
+
+        return ContentFrame
+    end
+
+    return {
+        Frame = MainFrame,
+        AddTab = function(self, tabName)
+            return AddTab(tabName)
+        end,
+        AddTextButton = function(self, tabName, buttonText, callback)
+            local TabFrame = ContentFrames[tabName]
+            if not TabFrame then return end
+
+            local Button = Instance.new("TextButton")
+            Button.Size = UDim2.new(1, -10, 0, 40)
+            Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            Button.TextColor3 = Color3.new(1, 1, 1)
+            Button.Text = buttonText or "Button"
+            Button.Font = Enum.Font.SourceSans
+            Button.TextSize = 18
+            Button.Parent = TabFrame
+            Button.MouseButton1Click:Connect(callback)
+        end,
+        AddToggle = function(self, tabName, toggleText, callback)
+            local TabFrame = ContentFrames[tabName]
+            if not TabFrame then return end
+
+            local ToggleFrame = Instance.new("Frame")
+            ToggleFrame.Size = UDim2.new(1, -10, 0, 40)
+            ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            ToggleFrame.Parent = TabFrame
+
+            local ToggleLabel = Instance.new("TextLabel")
+            ToggleLabel.Size = UDim2.new(0.8, 0, 1, 0)
+            ToggleLabel.Text = toggleText or "Toggle"
+            ToggleLabel.TextColor3 = Color3.new(1, 1, 1)
+            ToggleLabel.Font = Enum.Font.SourceSans
+            ToggleLabel.TextSize = 18
+            ToggleLabel.BackgroundTransparency = 1
+            ToggleLabel.Parent = ToggleFrame
+
+            local ToggleButton = Instance.new("TextButton")
+            ToggleButton.Size = UDim2.new(0.2, 0, 1, 0)
+            ToggleButton.Position = UDim2.new(0.8, 0, 0, 0)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+            ToggleButton.Text = "OFF"
+            ToggleButton.TextColor3 = Color3.new(1, 1, 1)
+            ToggleButton.Font = Enum.Font.SourceSans
+            ToggleButton.TextSize = 18
+            ToggleButton.Parent = ToggleFrame
+
+            local toggled = false
+            ToggleButton.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                ToggleButton.BackgroundColor3 = toggled and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
+                ToggleButton.Text = toggled and "ON" or "OFF"
+                callback(toggled)
+            end)
+        end,
+        AddSlider = function(self, tabName, sliderText, minValue, maxValue, callback)
+            local TabFrame = ContentFrames[tabName]
+            if not TabFrame then return end
+
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Size = UDim2.new(1, -10, 0, 40)
+            SliderFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            SliderFrame.Parent = TabFrame
+
+            local SliderLabel = Instance.new("TextLabel")
+            SliderLabel.Size = UDim2.new(0.8, 0, 1, 0)
+            SliderLabel.Text = sliderText or "Slider"
+            SliderLabel.TextColor3 = Color3.new(1, 1, 1)
+            SliderLabel.Font = Enum.Font.SourceSans
+            SliderLabel.TextSize = 18
+            SliderLabel.BackgroundTransparency = 1
+            SliderLabel.Parent = SliderFrame
+
+            local Slider = Instance.new("TextButton")
+            Slider.Size = UDim2.new(0.2, -10, 1, 0)
+            Slider.Position = UDim2.new(0.8, 0, 0, 0)
+            Slider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            Slider.Text = "50"
+            Slider.TextColor3 = Color3.new(1, 1, 1)
+            Slider.Font = Enum.Font.SourceSans
+            Slider.TextSize = 18
+            Slider.Parent = SliderFrame
+
+            local sliderValue = (minValue + maxValue) / 2
+            Slider.Text = tostring(sliderValue)
+            Slider.MouseButton1Click:Connect(function()
+                local value = math.random(minValue, maxValue)
+                Slider.Text = tostring(value)
+                callback(value)
+            end)
+        end,
+        AddCloseButton = function(self)
+            local CloseButton = Instance.new("TextButton")
+            CloseButton.Size = UDim2.new(0, 40, 0, 40)
+            CloseButton.Position = UDim2.new(1, -50, 0, 10)
+            CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+            CloseButton.Text = "X"
+            CloseButton.TextColor3 = Color3.new(1, 1, 1)
+            CloseButton.Font = Enum.Font.SourceSans
+            CloseButton.TextSize = 18
+            CloseButton.Parent = MainFrame
+
+            CloseButton.MouseButton1Click:Connect(function()
+                ScreenGui:Destroy()
+            end)
+        end
+    }
+end
+
+return UILib
