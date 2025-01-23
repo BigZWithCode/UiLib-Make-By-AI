@@ -7,12 +7,21 @@ function UILib:CreateUI(title)
     ScreenGui.Name = "CustomUI"
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 500, 0, 150)  -- Điều chỉnh chiều ngang
-    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -75)
+    MainFrame.Size = UDim2.new(0, 500, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
-    
+
+    -- Visibility toggle
+    local UIVisible = true
+
+    -- Toggle UI Function
+    local function ToggleUI()
+        UIVisible = not UIVisible
+        MainFrame.Visible = UIVisible
+    end
+
     -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, 0, 0, 40)
@@ -22,15 +31,15 @@ function UILib:CreateUI(title)
     TitleLabel.Font = Enum.Font.SourceSansBold
     TitleLabel.TextSize = 18
     TitleLabel.Parent = MainFrame
-    
-    -- Tabs (Đổi chiều từ dọc sang ngang)
+
+    -- Tabs
     local TabContainer = Instance.new("Frame")
-    TabContainer.Size = UDim2.new(1, 0, 0, 40)  -- Đặt chiều cao tab cố định
+    TabContainer.Size = UDim2.new(1, 0, 0, 40)
     TabContainer.Position = UDim2.new(0, 0, 0, 40)
     TabContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabContainer.BorderSizePixel = 0
     TabContainer.Parent = MainFrame
-    
+
     local TabHolder = {}
     local ContentFrames = {}
     local ActiveTab = nil
@@ -44,7 +53,7 @@ function UILib:CreateUI(title)
 
     local function CreateTabButton(tabName)
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(0, 120, 1, 0)  -- Thay đổi chiều rộng tab
+        TabButton.Size = UDim2.new(0, 120, 1, 0)
         TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         TabButton.Text = tabName
         TabButton.TextColor3 = Color3.new(1, 1, 1)
@@ -63,7 +72,7 @@ function UILib:CreateUI(title)
         if TabHolder[tabName] then return end
 
         local ContentFrame = Instance.new("Frame")
-        ContentFrame.Size = UDim2.new(1, 0, 1, -80)  -- Điều chỉnh chiều cao content frame nhỏ hơn
+        ContentFrame.Size = UDim2.new(1, 0, 1, -80)
         ContentFrame.Position = UDim2.new(0, 0, 0, 80)
         ContentFrame.BackgroundTransparency = 1
         ContentFrame.Visible = false
@@ -77,7 +86,6 @@ function UILib:CreateUI(title)
         TabHolder[tabName] = CreateTabButton(tabName)
         ContentFrames[tabName] = ContentFrame
 
-        -- Mặc định hiển thị tab đầu tiên
         if not ActiveTab then
             ShowTab(tabName)
         end
@@ -85,8 +93,10 @@ function UILib:CreateUI(title)
         return ContentFrame
     end
 
+    -- Return UI table with functionality
     return {
         Frame = MainFrame,
+        Toggle = ToggleUI, -- Gắn hàm toggle vào đây
         AddTab = function(self, tabName)
             return AddTab(tabName)
         end,
@@ -95,7 +105,7 @@ function UILib:CreateUI(title)
             if not TabFrame then return end
 
             local Button = Instance.new("TextButton")
-            Button.Size = UDim2.new(1, -10, 0, 30)  -- Điều chỉnh chiều cao button nhỏ hơn
+            Button.Size = UDim2.new(1, -10, 0, 30)
             Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
             Button.TextColor3 = Color3.new(1, 1, 1)
             Button.Text = buttonText or "Button"
@@ -104,101 +114,6 @@ function UILib:CreateUI(title)
             Button.Parent = TabFrame
             Button.MouseButton1Click:Connect(callback)
         end,
-        AddToggle = function(self, tabName, toggleText, callback)
-            local TabFrame = ContentFrames[tabName]
-            if not TabFrame then return end
-
-            local ToggleFrame = Instance.new("Frame")
-            ToggleFrame.Size = UDim2.new(1, -10, 0, 30)  -- Điều chỉnh chiều cao toggle nhỏ hơn
-            ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            ToggleFrame.Parent = TabFrame
-
-            local ToggleLabel = Instance.new("TextLabel")
-            ToggleLabel.Size = UDim2.new(0.8, 0, 1, 0)
-            ToggleLabel.Text = toggleText or "Toggle"
-            ToggleLabel.TextColor3 = Color3.new(1, 1, 1)
-            ToggleLabel.Font = Enum.Font.SourceSans
-            ToggleLabel.TextSize = 16
-            ToggleLabel.BackgroundTransparency = 1
-            ToggleLabel.Parent = ToggleFrame
-
-            local ToggleButton = Instance.new("TextButton")
-            ToggleButton.Size = UDim2.new(0.2, 0, 1, 0)
-            ToggleButton.Position = UDim2.new(0.8, 0, 0, 0)
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-            ToggleButton.Text = "OFF"
-            ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-            ToggleButton.Font = Enum.Font.SourceSans
-            ToggleButton.TextSize = 16
-            ToggleButton.Parent = ToggleFrame
-
-            local toggled = false
-            ToggleButton.MouseButton1Click:Connect(function()
-                toggled = not toggled
-                ToggleButton.BackgroundColor3 = toggled and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
-                ToggleButton.Text = toggled and "ON" or "OFF"
-                callback(toggled)
-            end)
-        end,
-        AddSlider = function(self, tabName, sliderText, minValue, maxValue, callback)
-            local TabFrame = ContentFrames[tabName]
-            if not TabFrame then return end
-
-            local SliderFrame = Instance.new("Frame")
-            SliderFrame.Size = UDim2.new(1, -10, 0, 30)  -- Điều chỉnh chiều cao slider nhỏ hơn
-            SliderFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            SliderFrame.Parent = TabFrame
-
-            local SliderLabel = Instance.new("TextLabel")
-            SliderLabel.Size = UDim2.new(0.8, 0, 1, 0)
-            SliderLabel.Text = sliderText or "Slider"
-            SliderLabel.TextColor3 = Color3.new(1, 1, 1)
-            SliderLabel.Font = Enum.Font.SourceSans
-            SliderLabel.TextSize = 16
-            SliderLabel.BackgroundTransparency = 1
-            SliderLabel.Parent = SliderFrame
-
-            local SliderBar = Instance.new("Frame")
-            SliderBar.Size = UDim2.new(0.6, 0, 0, 5)
-            SliderBar.Position = UDim2.new(0.8, 0, 0.5, -2)
-            SliderBar.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-            SliderBar.Parent = SliderFrame
-
-            local SliderButton = Instance.new("TextButton")
-            SliderButton.Size = UDim2.new(0, 10, 1, 0)
-            SliderButton.Position = UDim2.new(0, 0, 0, 0)
-            SliderButton.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
-            SliderButton.Text = ""
-            SliderButton.Parent = SliderBar
-
-            local sliderValue = (minValue + maxValue) / 2
-            SliderButton.MouseMoved:Connect(function(x, y)
-                local position = math.clamp(x - SliderBar.AbsolutePosition.X, 0, SliderBar.AbsoluteSize.X)
-                SliderButton.Position = UDim2.new(position / SliderBar.AbsoluteSize.X, 0, 0, 0)
-                local value = math.floor((position / SliderBar.AbsoluteSize.X) * (maxValue - minValue) + minValue)
-                SliderLabel.Text = sliderText .. ": " .. value
-                callback(value)
-            end)
-
-            -- Set initial slider value
-            SliderLabel.Text = sliderText .. ": " .. sliderValue
-            SliderButton.Position = UDim2.new((sliderValue - minValue) / (maxValue - minValue), 0, 0, 0)
-        end,
-        AddCloseButton = function(self)
-            local CloseButton = Instance.new("TextButton")
-            CloseButton.Size = UDim2.new(0, 30, 0, 30)
-            CloseButton.Position = UDim2.new(1, -40, 0, 10)
-            CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-            CloseButton.Text = "X"
-            CloseButton.TextColor3 = Color3.new(1, 1, 1)
-            CloseButton.Font = Enum.Font.SourceSans
-            CloseButton.TextSize = 16
-            CloseButton.Parent = MainFrame
-
-            CloseButton.MouseButton1Click:Connect(function()
-                ScreenGui:Destroy()
-            end)
-        end
     }
 end
 
