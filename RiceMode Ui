@@ -7,15 +7,15 @@ function UILib:CreateUI(title)
     ScreenGui.Name = "CustomUI"
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 350, 0, 250)  -- Điều chỉnh kích thước nhỏ hơn
-    MainFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
+    MainFrame.Size = UDim2.new(0, 500, 0, 150)  -- Điều chỉnh chiều ngang
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -75)
     MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
     
     -- Title
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, 0, 0, 40)  -- Giảm chiều cao title
+    TitleLabel.Size = UDim2.new(1, 0, 0, 40)
     TitleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     TitleLabel.Text = title or "UI Library"
     TitleLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -23,9 +23,9 @@ function UILib:CreateUI(title)
     TitleLabel.TextSize = 18
     TitleLabel.Parent = MainFrame
     
-    -- Tabs
+    -- Tabs (Đổi chiều từ dọc sang ngang)
     local TabContainer = Instance.new("Frame")
-    TabContainer.Size = UDim2.new(1, 0, 0, 35)  -- Điều chỉnh chiều cao tab nhỏ hơn
+    TabContainer.Size = UDim2.new(1, 0, 0, 40)  -- Đặt chiều cao tab cố định
     TabContainer.Position = UDim2.new(0, 0, 0, 40)
     TabContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabContainer.BorderSizePixel = 0
@@ -44,7 +44,7 @@ function UILib:CreateUI(title)
 
     local function CreateTabButton(tabName)
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(0, 85, 1, 0)  -- Giảm kích thước tab ngang
+        TabButton.Size = UDim2.new(0, 120, 1, 0)  -- Thay đổi chiều rộng tab
         TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         TabButton.Text = tabName
         TabButton.TextColor3 = Color3.new(1, 1, 1)
@@ -63,8 +63,8 @@ function UILib:CreateUI(title)
         if TabHolder[tabName] then return end
 
         local ContentFrame = Instance.new("Frame")
-        ContentFrame.Size = UDim2.new(1, 0, 1, -75)  -- Điều chỉnh chiều cao nhỏ hơn
-        ContentFrame.Position = UDim2.new(0, 0, 0, 75)
+        ContentFrame.Size = UDim2.new(1, 0, 1, -80)  -- Điều chỉnh chiều cao content frame nhỏ hơn
+        ContentFrame.Position = UDim2.new(0, 0, 0, 80)
         ContentFrame.BackgroundTransparency = 1
         ContentFrame.Visible = false
         ContentFrame.Parent = MainFrame
@@ -186,7 +186,7 @@ function UILib:CreateUI(title)
         end,
         AddCloseButton = function(self)
             local CloseButton = Instance.new("TextButton")
-            CloseButton.Size = UDim2.new(0, 30, 0, 30)  -- Giảm kích thước close button
+            CloseButton.Size = UDim2.new(0, 30, 0, 30)
             CloseButton.Position = UDim2.new(1, -40, 0, 10)
             CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
             CloseButton.Text = "X"
