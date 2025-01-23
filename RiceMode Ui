@@ -13,13 +13,36 @@ function UILib:CreateUI(title)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
 
-    -- Visibility toggle
-    local UIVisible = true
+    -- Dragging functionality
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
 
-    local function ToggleUI()
-        UIVisible = not UIVisible
-        MainFrame.Visible = UIVisible
-    end
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+        end
+    end)
+
+    MainFrame.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    MainFrame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
 
     -- Title
     local TitleLabel = Instance.new("TextLabel")
@@ -91,21 +114,6 @@ function UILib:CreateUI(title)
 
         return ContentFrame
     end
-
-    -- Toggle Button (nút ngoài UI để bật/tắt)
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(0, 100, 0, 40)
-    ToggleButton.Position = UDim2.new(0, 10, 0, 10)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    ToggleButton.Text = "Toggle UI"
-    ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-    ToggleButton.Font = Enum.Font.SourceSans
-    ToggleButton.TextSize = 16
-    ToggleButton.Parent = ScreenGui
-
-    ToggleButton.MouseButton1Click:Connect(function()
-        ToggleUI()
-    end)
 
     -- Return UI table with functionality
     return {
