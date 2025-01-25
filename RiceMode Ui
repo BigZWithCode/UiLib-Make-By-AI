@@ -1,44 +1,58 @@
 local Library = {}
 
-function Library:CreateUI()
+function Library:CreateUI(title)
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
-    local ToggleButton = Instance.new("TextButton")
-    local TabsFolder = Instance.new("Folder")
+    local TitleLabel = Instance.new("TextLabel")
+    local TabContainer = Instance.new("Frame")
+    local TabButtons = Instance.new("Frame")
+    local UIListLayout = Instance.new("UIListLayout")
 
     -- Setup ScreenGui
-    ScreenGui.Name = "CustomUILibrary"
+    ScreenGui.Name = "CustomUI"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    ScreenGui.ResetOnSpawn = false
 
     -- Setup MainFrame
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
-    MainFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-    MainFrame.Size = UDim2.new(0, 400, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    MainFrame.Visible = true
+    MainFrame.Size = UDim2.new(0, 500, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MainFrame.BorderSizePixel = 0
 
-    -- Setup Toggle Button
-    ToggleButton.Name = "ToggleButton"
-    ToggleButton.Parent = ScreenGui
-    ToggleButton.Text = "Toggle Menu"
-    ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-    ToggleButton.Position = UDim2.new(0, 20, 0, 20)
-    ToggleButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    -- Setup Title Label
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Parent = MainFrame
+    TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    TitleLabel.BorderSizePixel = 0
+    TitleLabel.Text = title or "UI Library"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.TextSize = 20
 
-    ToggleButton.MouseButton1Click:Connect(function()
-        MainFrame.Visible = not MainFrame.Visible
-    end)
+    -- Setup TabContainer
+    TabContainer.Name = "TabContainer"
+    TabContainer.Parent = MainFrame
+    TabContainer.Size = UDim2.new(1, 0, 1, -50)
+    TabContainer.Position = UDim2.new(0, 0, 0, 50)
+    TabContainer.BackgroundTransparency = 1
 
-    -- Tabs Folder
-    TabsFolder.Name = "Tabs"
-    TabsFolder.Parent = MainFrame
+    -- Setup Tab Buttons
+    TabButtons.Name = "TabButtons"
+    TabButtons.Parent = MainFrame
+    TabButtons.Size = UDim2.new(0, 150, 1, -50)
+    TabButtons.Position = UDim2.new(0, 0, 0, 50)
+    TabButtons.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    TabButtons.BorderSizePixel = 0
+
+    UIListLayout.Parent = TabButtons
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     return {
-        ScreenGui = ScreenGui,
         MainFrame = MainFrame,
-        TabsFolder = TabsFolder
+        TabContainer = TabContainer,
+        TabButtons = TabButtons
     }
 end
 
@@ -46,25 +60,27 @@ function Library:AddTab(uiElements, tabName)
     local TabButton = Instance.new("TextButton")
     local TabFrame = Instance.new("Frame")
 
-    -- Tab Button
+    -- Setup Tab Button
     TabButton.Name = tabName .. "Button"
+    TabButton.Parent = uiElements.TabButtons
+    TabButton.Size = UDim2.new(1, 0, 0, 40)
+    TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     TabButton.Text = tabName
-    TabButton.Size = UDim2.new(0, 100, 0, 30)
-    TabButton.Parent = uiElements.MainFrame
-    TabButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
-    TabButton.Position = UDim2.new(0, #uiElements.TabsFolder:GetChildren() * 110, 0, 0)
+    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabButton.Font = Enum.Font.SourceSans
+    TabButton.TextSize = 18
 
-    -- Tab Frame
+    -- Setup Tab Frame
     TabFrame.Name = tabName .. "Frame"
-    TabFrame.Size = UDim2.new(1, 0, 1, -40)
-    TabFrame.Position = UDim2.new(0, 0, 0, 40)
-    TabFrame.Parent = uiElements.TabsFolder
-    TabFrame.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+    TabFrame.Parent = uiElements.TabContainer
+    TabFrame.Size = UDim2.new(1, -150, 1, 0)
+    TabFrame.Position = UDim2.new(0, 150, 0, 0)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabFrame.Visible = false
 
     TabButton.MouseButton1Click:Connect(function()
-        for _, frame in pairs(uiElements.TabsFolder:GetChildren()) do
-            frame.Visible = false
+        for _, tab in pairs(uiElements.TabContainer:GetChildren()) do
+            tab.Visible = false
         end
         TabFrame.Visible = true
     end)
@@ -102,98 +118,6 @@ function Library:AddToggle(parent, labelText, callback)
     end)
 end
 
-function Library:AddTextButton(parent, labelText, callback)
-    local Button = Instance.new("TextButton")
-
-    Button.Text = labelText
-    Button.Size = UDim2.new(1, -10, 0, 30)
-    Button.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    Button.TextColor3 = Color3.new(1, 1, 1)
-    Button.Parent = parent
-
-    Button.MouseButton1Click:Connect(function()
-        callback()
-    end)
-end
-
-function Library:AddDropdown(parent, labelText, options, callback)
-    local DropdownFrame = Instance.new("Frame")
-    local Label = Instance.new("TextLabel")
-    local DropdownButton = Instance.new("TextButton")
-    local DropdownList = Instance.new("Frame")
-    local isOpen = false
-
-    DropdownFrame.Size = UDim2.new(1, -10, 0, 30)
-    DropdownFrame.BackgroundTransparency = 1
-    DropdownFrame.Parent = parent
-
-    Label.Text = labelText
-    Label.Size = UDim2.new(0.7, 0, 1, 0)
-    Label.BackgroundTransparency = 1
-    Label.TextColor3 = Color3.new(1, 1, 1)
-    Label.Parent = DropdownFrame
-
-    DropdownButton.Text = "Select"
-    DropdownButton.Size = UDim2.new(0.3, 0, 1, 0)
-    DropdownButton.Position = UDim2.new(0.7, 0, 0, 0)
-    DropdownButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    DropdownButton.Parent = DropdownFrame
-
-    DropdownList.Size = UDim2.new(1, 0, 0, #options * 30)
-    DropdownList.Position = UDim2.new(0, 0, 1, 0)
-    DropdownList.Visible = false
-    DropdownList.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-    DropdownList.Parent = DropdownFrame
-
-    for i, option in ipairs(options) do
-        local OptionButton = Instance.new("TextButton")
-        OptionButton.Text = option
-        OptionButton.Size = UDim2.new(1, -10, 0, 30)
-        OptionButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-        OptionButton.TextColor3 = Color3.new(1, 1, 1)
-        OptionButton.Parent = DropdownList
-
-        OptionButton.MouseButton1Click:Connect(function()
-            DropdownButton.Text = option
-            DropdownList.Visible = false
-            isOpen = false
-            callback(option)
-        end)
-    end
-
-    DropdownButton.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        DropdownList.Visible = isOpen
-    end)
-end
-
-function Library:AddTextInput(parent, labelText, callback)
-    local InputFrame = Instance.new("Frame")
-    local Label = Instance.new("TextLabel")
-    local TextBox = Instance.new("TextBox")
-
-    InputFrame.Size = UDim2.new(1, -10, 0, 30)
-    InputFrame.BackgroundTransparency = 1
-    InputFrame.Parent = parent
-
-    Label.Text = labelText
-    Label.Size = UDim2.new(0.4, 0, 1, 0)
-    Label.BackgroundTransparency = 1
-    Label.TextColor3 = Color3.new(1, 1, 1)
-    Label.Parent = InputFrame
-
-    TextBox.PlaceholderText = "Enter text..."
-    TextBox.Size = UDim2.new(0.6, 0, 1, 0)
-    TextBox.Position = UDim2.new(0.4, 0, 0, 0)
-    TextBox.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    TextBox.TextColor3 = Color3.new(1, 1, 1)
-    TextBox.Parent = InputFrame
-
-    TextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            callback(TextBox.Text)
-        end
-    end)
-end
+-- You can add more functions here (Slider, Dropdown, ColorPicker, etc.)
 
 return Library
