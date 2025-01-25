@@ -1,102 +1,153 @@
--- Tạo UI Library
-local Library = {}
+local UILibrary = {}
 
-function Library:CreateWindow(title)
+function UILibrary:CreateWindow(title)
     local ScreenGui = Instance.new("ScreenGui")
-    local Frame = Instance.new("Frame")
-    local TitleLabel = Instance.new("TextLabel")
-    local TabContainer = Instance.new("Frame")
-    local TabButtons = Instance.new("Frame")
+    local MainFrame = Instance.new("Frame")
     local UIListLayout = Instance.new("UIListLayout")
 
-    ScreenGui.Name = title
+    ScreenGui.Name = "CustomUILibrary"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    Frame.Name = "MainFrame"
-    Frame.Size = UDim2.new(0, 500, 0, 400)
-    Frame.Position = UDim2.new(0.5, -250, 0.5, -200)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.Parent = ScreenGui
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+    MainFrame.Size = UDim2.new(0, 300, 0, 400)
+    MainFrame.Visible = true
 
-    TitleLabel.Text = title
-    TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-    TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TitleLabel.TextColor3 = Color3.new(1, 1, 1)
-    TitleLabel.Parent = Frame
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Parent = MainFrame
+    Title.Text = title
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.Font = Enum.Font.SourceSans
+    Title.TextSize = 20
 
-    TabButtons.Name = "TabButtons"
-    TabButtons.Size = UDim2.new(0, 120, 1, -40)
-    TabButtons.Position = UDim2.new(0, 0, 0, 40)
-    TabButtons.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TabButtons.Parent = Frame
-
-    UIListLayout.Parent = TabButtons
+    UIListLayout.Parent = MainFrame
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    TabContainer.Name = "TabContainer"
-    TabContainer.Size = UDim2.new(1, -120, 1, -40)
-    TabContainer.Position = UDim2.new(0, 120, 0, 40)
-    TabContainer.BackgroundTransparency = 1
-    TabContainer.Parent = Frame
+    local Window = {}
+    Window.MainFrame = MainFrame
 
-    return {Frame = Frame, Tabs = {}, TabButtons = TabButtons, TabContainer = TabContainer}
-end
+    function Window:AddToggle(name, callback)
+        local ToggleFrame = Instance.new("Frame")
+        ToggleFrame.Parent = MainFrame
+        ToggleFrame.Size = UDim2.new(1, 0, 0, 30)
+        ToggleFrame.BackgroundTransparency = 1
 
-function Library:CreateTab(window, tabName)
-    local TabButton = Instance.new("TextButton")
-    local TabContent = Instance.new("Frame")
+        local ToggleButton = Instance.new("TextButton")
+        ToggleButton.Parent = ToggleFrame
+        ToggleButton.Size = UDim2.new(0, 30, 1, 0)
+        ToggleButton.BackgroundColor3 = Color3.new(0.8, 0.8, 0.8)
+        ToggleButton.Text = ""
 
-    -- Tạo nút tab
-    TabButton.Text = tabName
-    TabButton.Size = UDim2.new(1, 0, 0, 40)
-    TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    TabButton.TextColor3 = Color3.new(1, 1, 1)
-    TabButton.Parent = window.TabButtons
+        local ToggleLabel = Instance.new("TextLabel")
+        ToggleLabel.Parent = ToggleFrame
+        ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+        ToggleLabel.Position = UDim2.new(0, 40, 0, 0)
+        ToggleLabel.BackgroundTransparency = 1
+        ToggleLabel.Text = name
+        ToggleLabel.Font = Enum.Font.SourceSans
+        ToggleLabel.TextSize = 18
+        ToggleLabel.TextColor3 = Color3.new(1, 1, 1)
 
-    -- Tạo nội dung tab
-    TabContent.Name = tabName
-    TabContent.Size = UDim2.new(1, 0, 1, 0)
-    TabContent.BackgroundTransparency = 1
-    TabContent.Visible = false
-    TabContent.Parent = window.TabContainer
+        local toggled = false
+        ToggleButton.MouseButton1Click:Connect(function()
+            toggled = not toggled
+            ToggleButton.BackgroundColor3 = toggled and Color3.new(0.2, 1, 0.2) or Color3.new(0.8, 0.8, 0.8)
+            if callback then callback(toggled) end
+        end)
+    end
 
-    -- Thêm cơ chế chuyển đổi tab
-    TabButton.MouseButton1Click:Connect(function()
-        for _, tab in pairs(window.Tabs) do
-            tab.Content.Visible = false
+    function Window:AddTextButton(name, callback)
+        local Button = Instance.new("TextButton")
+        Button.Parent = MainFrame
+        Button.Size = UDim2.new(1, 0, 0, 30)
+        Button.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+        Button.Text = name
+        Button.Font = Enum.Font.SourceSans
+        Button.TextSize = 18
+        Button.TextColor3 = Color3.new(1, 1, 1)
+
+        Button.MouseButton1Click:Connect(function()
+            if callback then callback() end
+        end)
+    end
+
+    function Window:AddDropdown(name, options, callback)
+        local Dropdown = Instance.new("Frame")
+        Dropdown.Parent = MainFrame
+        Dropdown.Size = UDim2.new(1, 0, 0, 30)
+        Dropdown.BackgroundTransparency = 1
+
+        local DropdownButton = Instance.new("TextButton")
+        DropdownButton.Parent = Dropdown
+        DropdownButton.Size = UDim2.new(1, 0, 1, 0)
+        DropdownButton.Text = name
+        DropdownButton.Font = Enum.Font.SourceSans
+        DropdownButton.TextSize = 18
+        DropdownButton.TextColor3 = Color3.new(1, 1, 1)
+        DropdownButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+
+        local DropdownMenu = Instance.new("Frame")
+        DropdownMenu.Parent = Dropdown
+        DropdownMenu.Size = UDim2.new(1, 0, 0, #options * 30)
+        DropdownMenu.Position = UDim2.new(0, 0, 1, 0)
+        DropdownMenu.Visible = false
+        DropdownMenu.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+
+        local UIList = Instance.new("UIListLayout")
+        UIList.Parent = DropdownMenu
+
+        for _, option in ipairs(options) do
+            local OptionButton = Instance.new("TextButton")
+            OptionButton.Parent = DropdownMenu
+            OptionButton.Size = UDim2.new(1, 0, 0, 30)
+            OptionButton.Text = option
+            OptionButton.Font = Enum.Font.SourceSans
+            OptionButton.TextSize = 18
+            OptionButton.TextColor3 = Color3.new(1, 1, 1)
+            OptionButton.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+
+            OptionButton.MouseButton1Click:Connect(function()
+                DropdownButton.Text = option
+                DropdownMenu.Visible = false
+                if callback then callback(option) end
+            end)
         end
-        TabContent.Visible = true
-    end)
 
-    table.insert(window.Tabs, {Button = TabButton, Content = TabContent})
-    return TabContent
+        DropdownButton.MouseButton1Click:Connect(function()
+            DropdownMenu.Visible = not DropdownMenu.Visible
+        end)
+    end
+
+    function Window:AddTextInput(name, callback)
+        local TextInputFrame = Instance.new("Frame")
+        TextInputFrame.Parent = MainFrame
+        TextInputFrame.Size = UDim2.new(1, 0, 0, 30)
+        TextInputFrame.BackgroundTransparency = 1
+
+        local TextBox = Instance.new("TextBox")
+        TextBox.Parent = TextInputFrame
+        TextBox.Size = UDim2.new(1, -10, 1, 0)
+        TextBox.Position = UDim2.new(0, 10, 0, 0)
+        TextBox.Text = ""
+        TextBox.PlaceholderText = name
+        TextBox.Font = Enum.Font.SourceSans
+        TextBox.TextSize = 18
+        TextBox.TextColor3 = Color3.new(1, 1, 1)
+        TextBox.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+
+        TextBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed and callback then
+                callback(TextBox.Text)
+            end
+        end)
+    end
+
+    return Window
 end
 
-function Library:CreateCheckbox(parent, label)
-    local CheckboxFrame = Instance.new("Frame")
-    local Checkbox = Instance.new("TextButton")
-    local Label = Instance.new("TextLabel")
-
-    CheckboxFrame.Size = UDim2.new(1, 0, 0, 30)
-    CheckboxFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    CheckboxFrame.Parent = parent
-
-    Checkbox.Size = UDim2.new(0, 20, 0, 20)
-    Checkbox.Position = UDim2.new(0, 5, 0.5, -10)
-    Checkbox.Text = ""
-    Checkbox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Checkbox.Parent = CheckboxFrame
-
-    Label.Text = label
-    Label.Position = UDim2.new(0, 30, 0, 0)
-    Label.Size = UDim2.new(1, -30, 1, 0)
-    Label.TextColor3 = Color3.new(1, 1, 1)
-    Label.BackgroundTransparency = 1
-    Label.Parent = CheckboxFrame
-
-    Checkbox.MouseButton1Click:Connect(function()
-        Checkbox.BackgroundColor3 = Checkbox.BackgroundColor3 == Color3.fromRGB(20, 20, 20) and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(20, 20, 20)
-    end)
-end
-
-return Library
+return UILibrary
